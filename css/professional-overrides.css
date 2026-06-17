@@ -1,0 +1,55 @@
+/* professional-overrides.css
+   Targeted overrides for the Bootstrap professional pages (index.html, resume.html).
+   Keep it light — extend Bootstrap, don't fight it. */
+
+:root {
+  --accent: #1f3b5c;     /* deep professional navy */
+  --accent-soft: #2f6b4f;/* forest accent          */
+  --ink: #1f2933;
+}
+
+body { color: var(--ink); }
+
+/* Section headers */
+.section-title {
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: .01em;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: .35rem;
+  margin-bottom: 1rem;
+}
+
+/* Sticky, tidy navbar */
+.navbar-brand { font-weight: 700; letter-spacing: .03em; }
+.navbar.bg-accent { background-color: var(--accent) !important; }
+
+/* Hero on index */
+.hero-pro {
+  background: linear-gradient(135deg, var(--accent) 0%, #15293f 100%);
+  color: #fff;
+}
+.hero-pro .lead { color: #d7e2ee; }
+
+/* Expertise / project cards */
+.feature-card { border: 0; box-shadow: 0 6px 20px rgba(31,59,92,.10); transition: transform .15s; height: 100%; }
+.feature-card:hover { transform: translateY(-3px); }
+.feature-card .icon { color: var(--accent-soft); }
+
+/* Résumé timeline */
+.resume-entry { padding-left: 1rem; border-left: 3px solid #dde3ea; }
+.resume-entry .org { color: var(--accent-soft); font-weight: 600; }
+.resume-entry .dates { color: #6b7785; font-size: .9rem; }
+.badge-skill { background: #eef2f7; color: var(--accent); font-weight: 600; }
+
+/* Links */
+a { color: var(--accent-soft); }
+a:hover { color: var(--accent); }
+
+/* Print-friendly résumé */
+@media print {
+  .navbar, .site-footer, .no-print { display: none !important; }
+  body { font-size: 11pt; }
+  .resume-entry { border-left: none; padding-left: 0; }
+  a { color: #000; text-decoration: none; }
+}

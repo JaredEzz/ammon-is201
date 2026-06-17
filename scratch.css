@@ -1,0 +1,246 @@
+/* ============================================================
+   scratch.css  —  "Learning to Fly"  (IS 201 paragliding page)
+   Hand-written from scratch. NO Bootstrap, no framework.
+   Author build: custom stylesheet for scratch.html only.
+   Alpine palette: deep navy / slate / glacier blue / forest /
+   warm sunrise accent / off-white.
+   ============================================================ */
+
+/* ---- Design tokens ---------------------------------------- */
+:root {
+  --navy:    #0f2740;   /* deep navy   */
+  --slate:   #33475b;   /* slate       */
+  --glacier: #6fb7d4;   /* glacier blue*/
+  --forest:  #2f6b4f;   /* forest green*/
+  --sunrise: #f08a3c;   /* warm accent */
+  --offwhite:#f4f7fa;   /* off-white   */
+  --ink:     #16242f;   /* body text   */
+  --muted:   #5d6f7d;
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(15, 39, 64, .18);
+}
+
+/* ---- Reset-ish + base ------------------------------------- */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+/* Custom background (required): subtle alpine gradient wash */
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; /* font-family style */
+  color: var(--ink);                                            /* font-color style  */
+  line-height: 1.65;
+  background: linear-gradient(180deg, #eaf2f8 0%, var(--offwhite) 40%, #e7eef4 100%);
+}
+
+/* Anchor-destination spacing so fixed nav doesn't cover headings */
+:target { scroll-margin-top: 90px; }
+
+img { max-width: 100%; display: block; }
+
+a { color: var(--forest); }
+a:focus-visible,
+button:focus-visible { outline: 3px solid var(--sunrise); outline-offset: 2px; }
+
+/* ---- Top navigation --------------------------------------- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem 1rem;
+  padding: .7rem 1.2rem;
+  background: rgba(15, 39, 64, .92);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow);
+}
+.site-nav .brand {
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--offwhite);
+  margin-right: auto;
+  text-decoration: none;
+}
+.site-nav a {
+  color: #d8e6f1;
+  text-decoration: none;
+  font-size: .95rem;
+  padding: .3rem .55rem;
+  border-radius: 8px;
+  transition: background .15s, color .15s;
+}
+.site-nav a:hover { background: rgba(111, 183, 212, .25); color: #fff; }
+.site-nav a.cta { background: var(--sunrise); color: #1c1206; font-weight: 600; }
+.site-nav a.cta:hover { background: #ffa05a; }
+
+/* ---- Hero (styled div) ------------------------------------ */
+.hero {
+  position: relative;
+  min-height: 78vh;
+  display: grid;
+  place-items: end start;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  color: var(--offwhite);
+  background:
+    linear-gradient(180deg, rgba(15,39,64,.15) 0%, rgba(15,39,64,.78) 100%),
+    url("assets/img/paragliding/scenic-2.jpg") center 30% / cover no-repeat;
+}
+.hero__inner { max-width: 720px; }
+.hero h1 {
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  line-height: 1.05;
+  margin: 0 0 .4rem;
+  text-shadow: 0 3px 18px rgba(0,0,0,.5);
+}
+.hero p.lead {
+  font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+  max-width: 38ch;
+  text-shadow: 0 2px 10px rgba(0,0,0,.55);
+}
+.hero .jump {
+  display: inline-block;
+  margin-top: 1rem;
+  background: var(--glacier);
+  color: var(--navy);
+  font-weight: 700;
+  text-decoration: none;
+  padding: .65rem 1.25rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+}
+.hero .jump:hover { background: #8ccae3; }
+
+/* ---- Generic content layout ------------------------------- */
+main { max-width: 1080px; margin: 0 auto; padding: 0 1.2rem; }
+
+.section {            /* styled content-block div */
+  background: #fff;
+  margin: 2.2rem 0;
+  padding: clamp(1.4rem, 4vw, 2.6rem);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-top: 5px solid var(--glacier);
+}
+.section h2 {
+  color: var(--navy);
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  margin-top: 0;
+}
+.section h2 .kicker {
+  display: block;
+  font-size: .8rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sunrise);
+  font-weight: 700;
+}
+.section--forest { border-top-color: var(--forest); }
+.section--sunrise { border-top-color: var(--sunrise); }
+
+/* "Requires" cards via CSS Grid */
+.cardgrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 1.2rem;
+}
+.card {
+  background: var(--offwhite);
+  border: 1px solid #dde7ef;
+  border-radius: 12px;
+  padding: 1.1rem 1.2rem;
+}
+.card h3 { margin: 0 0 .3rem; color: var(--forest); font-size: 1.08rem; }
+.card p { margin: 0; color: var(--muted); font-size: .96rem; }
+
+/* Nested ordered/unordered list (required) */
+.progression { margin-top: 1rem; padding-left: 1.2rem; }
+.progression > li {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+.progression ul {
+  margin: .45rem 0 0;
+  font-weight: 400;
+  color: var(--ink);
+}
+.progression ul li { margin: .15rem 0; }
+
+/* Photo gallery (Flexbox) */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+  margin-top: 1.2rem;
+}
+.gallery figure { flex: 1 1 220px; margin: 0; }
+.gallery img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.gallery figcaption { font-size: .82rem; color: var(--muted); margin-top: .3rem; }
+
+/* Responsive video / iframe wrappers */
+.media-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: #000;
+}
+.media-frame iframe,
+.media-frame video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.caption { color: var(--muted); font-size: .92rem; margin-top: .6rem; }
+
+/* Tableau wrapper */
+.tableau-wrap {
+  margin-top: 1.2rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: #fff;
+}
+.tableau-wrap .tableauPlaceholder { width: 100% !important; }
+
+/* ---- Footer / navigation div ------------------------------ */
+.site-footer {
+  margin-top: 3rem;
+  background: var(--navy);
+  color: #cdddea;
+  padding: 2.4rem 1.2rem 3rem;
+}
+.site-footer .foot-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: center;
+}
+.site-footer a { color: var(--glacier); text-decoration: none; font-weight: 600; }
+.site-footer a:hover { color: #fff; text-decoration: underline; }
+.site-footer .back-top { margin-left: auto; }
+.site-footer small { display: block; width: 100%; color: #8fa6b8; margin-top: 1rem; }
+
+/* ---- Responsive behavior ---------------------------------- */
+@media (max-width: 640px) {
+  .site-nav { gap: .25rem .5rem; padding: .6rem .8rem; }
+  .site-nav .brand { width: 100%; margin-bottom: .25rem; }
+  .hero { min-height: 70vh; place-items: end start; }
+  .gallery img { height: 160px; }
+}

@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RE Underwriter — Interactive Demo | Ammon Hasson</title>
+<meta name="description" content="RE Underwriter: an interactive, public, static demonstration of a real-estate acquisition screening and comparison application built by Ammon Hasson using sample Northern Utah properties." />
+<style>
+  /* ----------------------------------------------------------------
+     RE Underwriter — standalone demo (single file, no server, no login)
+     Hand-written CSS mirroring the real app's look so it runs offline.
+  ---------------------------------------------------------------- */
+  :root{
+    --slate-900:#0f172a; --slate-700:#334155; --slate-600:#475569;
+    --slate-500:#64748b; --slate-400:#94a3b8; --slate-200:#e2e8f0;
+    --slate-100:#f1f5f9; --slate-50:#f8fafc;
+    --emerald-700:#047857; --emerald-600:#059669; --emerald-500:#10b981;
+    --emerald-50:#ecfdf5; --emerald-200:#a7f3d0; --emerald-800:#065f46;
+    --teal-600:#0d9488;
+    --amber-400:#fbbf24; --amber-50:#fffbeb; --amber-200:#fde68a; --amber-800:#92400e;
+    --orange-400:#fb923c; --orange-50:#fff7ed; --orange-200:#fed7aa; --orange-800:#9a3412;
+    --rose-500:#f43f5e; --rose-50:#fff1f2; --rose-200:#fecdd3; --rose-700:#be123c;
+    --sky-700:#0369a1;
+    /* hairlines + layered shadows for a less-flat, more intentional surface */
+    --line:#e7e9ef; --line-strong:#dadee6; --surface:#fafbfc;
+    --shadow-sm:0 1px 2px rgba(16,24,40,.04), 0 1px 1px rgba(16,24,40,.03);
+    --shadow-card:0 1px 2px rgba(16,24,40,.05), 0 4px 12px -6px rgba(16,24,40,.06);
+    --r-card:14px; --r:9px; --r-sm:7px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Inter","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    color:var(--slate-900); background:#fff; line-height:1.55; font-size:14px;
+    letter-spacing:-.005em;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
+  }
+  .tnum{font-variant-numeric:tabular-nums}
+  a{color:inherit}
+  button{font-family:inherit}
+
+  .wrap{max-width:78rem;margin:0 auto;padding:2.25rem 1.75rem 4rem}
+
+  /* demo banner — quiet info bar, not a sticker */
+  .demo-banner{
+    display:flex;gap:.75rem;align-items:flex-start;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    padding:.9rem 1.1rem;margin-bottom:2rem;font-size:.8rem;line-height:1.55;color:var(--slate-600);
+  }
+  .demo-banner b{color:var(--slate-900);font-weight:600}
+  .demo-banner .ic{font-size:1rem;line-height:1.3;opacity:.85}
+
+  /* header */
+  header.app{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:.6rem}
+  .logo{
+    display:inline-flex;height:2.1rem;width:2.1rem;align-items:center;justify-content:center;
+    border-radius:.5rem;background:var(--emerald-700);
+    color:#fff;font-size:.8rem;font-weight:700;letter-spacing:.02em;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 1px 2px rgba(16,24,40,.12);
+  }
+  header.app h1{font-size:1.6rem;font-weight:680;letter-spacing:-.028em;margin:0;color:#0b1220}
+  .subtitle{margin:.55rem 0 0;font-size:.875rem;color:var(--slate-500);max-width:38rem}
+  .hdr-actions{display:flex;align-items:center;gap:.5rem}
+  .btn-ghost{
+    border:1px solid var(--line-strong);background:#fff;border-radius:var(--r-sm);
+    padding:.4rem .8rem;font-size:.82rem;font-weight:500;color:var(--slate-700);cursor:pointer;
+    box-shadow:var(--shadow-sm);transition:background .12s,border-color .12s;
+  }
+  .btn-ghost:hover{background:var(--surface);border-color:#cbd2dc}
+
+  /* quick-start */
+  .card{
+    border:1px solid var(--line);background:#fff;border-radius:var(--r-card);
+    box-shadow:var(--shadow-card);
+  }
+  .qs{padding:1.75rem;margin-top:1.5rem}
+  .qs-head{display:flex;align-items:flex-start;gap:.85rem}
+  .qs-ic{
+    display:inline-flex;height:2.25rem;width:2.25rem;flex:none;align-items:center;justify-content:center;
+    border-radius:var(--r-sm);font-size:1.05rem;
+    background:var(--emerald-50);
+    box-shadow:inset 0 0 0 1px var(--emerald-200);
+  }
+  .qs-head h3{margin:0;font-size:.95rem;font-weight:650;letter-spacing:-.01em}
+  .qs-head p{margin:.25rem 0 0;font-size:.78rem;line-height:1.55;color:var(--slate-500);max-width:46rem}
+  textarea.qs-input{
+    margin-top:1rem;width:100%;border:1px solid var(--slate-200);background:#f8fafc80;
+    border-radius:.375rem;padding:.625rem .75rem;font-size:.875rem;font-family:inherit;resize:vertical;
+    outline:none;
+  }
+  textarea.qs-input:focus{border-color:var(--emerald-500);background:#fff;box-shadow:0 0 0 3px #d1fae580}
+  .qs-row{margin-top:.85rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem}
+  .qs-hint{font-size:.8rem;color:var(--slate-500)}
+  .btn-primary{
+    display:inline-flex;align-items:center;gap:.5rem;border:none;cursor:pointer;
+    border-radius:var(--r-sm);padding:.55rem 1.05rem;font-size:.85rem;font-weight:600;color:#fff;
+    background:var(--emerald-600);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 1px 2px rgba(5,150,105,.35);
+    transition:background .12s;
+  }
+  .btn-primary:hover{background:var(--emerald-700)}
+  .btn-primary:disabled{opacity:.6;cursor:not-allowed}
+  .spin{height:.9rem;width:.9rem;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* dashboard grid */
+  .dash{margin-top:2.25rem;display:grid;grid-template-columns:1fr;gap:1.5rem}
+  @media(min-width:1024px){.dash{grid-template-columns:minmax(0,1fr) 372px;gap:1.75rem}}
+
+  table.deals{width:100%;border-collapse:collapse;font-size:.875rem}
+  .tbl-wrap{overflow-x:auto}
+  table.deals thead th{
+    text-align:left;font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--slate-500);background:var(--surface);border-bottom:1px solid var(--line);
+    padding:.7rem 1.1rem;white-space:nowrap;
+  }
+  table.deals thead th.c{text-align:center}
+  table.deals thead th.r{text-align:right}
+  table.deals tbody td{padding:.8rem 1.1rem;border-bottom:1px solid #f1f3f7;white-space:nowrap}
+  table.deals tbody tr:last-child td{border-bottom:none}
+  table.deals tbody tr{cursor:pointer;transition:background .1s}
+  table.deals tbody tr:hover{background:var(--surface)}
+  tr.sel{background:#f0fdf7 !important}
+  tr.checked{background:#e9fbf2 !important}
+  tr.rejected td{color:var(--slate-400)}
+  td.r{text-align:right}
+  td.c{text-align:center}
+  .addr-link{font-weight:500;color:var(--slate-900);text-decoration:none}
+  .addr-link:hover{text-decoration:underline}
+  tr.rejected .addr-link{color:var(--slate-400)}
+  .dot{display:inline-block;height:.4rem;width:.4rem;border-radius:50%;background:var(--emerald-500);margin-right:.1rem;vertical-align:middle}
+  .pos{color:var(--emerald-700)} .neg{color:var(--rose-700)}
+  input[type=checkbox]{height:1rem;width:1rem;cursor:pointer;accent-color:var(--emerald-600)}
+  input[type=checkbox]:disabled{opacity:.4;cursor:not-allowed}
+
+  /* score badge in table */
+  .score-badge{
+    display:inline-flex;height:1.7rem;min-width:2.1rem;padding:0 .35rem;align-items:center;justify-content:center;
+    border-radius:var(--r-sm);font-size:.85rem;font-weight:650;
+  }
+  .s-emerald{background:var(--emerald-600);color:#fff}
+  .s-amber{background:var(--amber-400);color:#451a03}
+  .s-orange{background:var(--orange-400);color:#431407}
+  .s-rose{background:var(--rose-500);color:#fff}
+  .s-none{background:var(--slate-100);color:var(--slate-500)}
+
+  /* rec pill */
+  .pill{display:inline-flex;align-items:center;border-radius:9999px;border:1px solid;font-weight:500;padding:.1rem .625rem;font-size:.75rem}
+  .pill.lg{padding:.25rem .75rem;font-size:.875rem}
+  .p-pursue{border-color:var(--emerald-200);background:var(--emerald-50);color:var(--emerald-700)}
+  .p-maybe{border-color:var(--amber-200);background:var(--amber-50);color:var(--amber-800)}
+  .p-marginal{border-color:var(--orange-200);background:var(--orange-50);color:var(--orange-800)}
+  .p-reject{border-color:var(--rose-200);background:var(--rose-50);color:var(--rose-700)}
+  .status-pill{display:inline-flex;align-items:center;border-radius:9999px;padding:.1rem .5rem;font-size:.625rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;background:var(--slate-100);color:var(--slate-600)}
+  .status-pill.disc{background:var(--rose-50);color:var(--rose-700)}
+
+  /* compare-select banner */
+  .cmp-bar{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;font-size:.75rem;
+    background:#ecfdf566;border-bottom:1px solid var(--slate-200);color:var(--emerald-800)}
+  .cmp-bar button{background:none;border:none;cursor:pointer;color:inherit;border-radius:.375rem;padding:.1rem .5rem;font-size:.75rem}
+  .cmp-bar button:hover{background:#d1fae5}
+
+  /* snapshot panel */
+  aside.snap{align-self:start;overflow:hidden}
+  .snap-head{border-bottom:1px solid var(--line);background:var(--surface);padding:1.1rem 1.35rem}
+  .eyebrow{font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--slate-400);margin:0}
+  .snap-addr{margin:.3rem 0 0;font-size:1.02rem;font-weight:650;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .snap-loc{margin:.1rem 0 0;font-size:.75rem;color:var(--slate-500)}
+  .snap-gauge-row{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem}
+  .gauge{position:relative;display:inline-flex;height:7rem;width:7rem;align-items:center;justify-content:center}
+  .gauge svg{height:100%;width:100%;transform:rotate(-90deg)}
+  .gauge .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gauge .gv{font-size:1.55rem;font-weight:700;letter-spacing:-.03em}
+  .gauge .gl{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--slate-400)}
+  .snap-tiles{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:0 1.25rem 1.25rem}
+  .tile{border:1px solid var(--line);background:#fff;border-radius:var(--r-sm);padding:.7rem .8rem}
+  .tile .tl{font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--slate-400);margin:0}
+  .tile .tv{margin:.25rem 0 0;font-size:1.08rem;font-weight:650;letter-spacing:-.015em}
+  .tile .th{margin:.15rem 0 0;font-size:.625rem;color:var(--slate-400)}
+  .tv.info{color:var(--sky-700)} .tv.positive{color:var(--emerald-700)} .tv.negative{color:var(--rose-700)}
+  .snap-foot{border-top:1px solid var(--slate-200);padding:.75rem 1.25rem}
+  .btn-dark{display:block;width:100%;text-align:center;border:none;cursor:pointer;border-radius:.375rem;
+    background:var(--slate-900);color:#fff;padding:.5rem .75rem;font-size:.875rem;font-weight:500}
+  .btn-dark:hover{background:var(--slate-700)}
+  .snap-empty{border:1px dashed var(--slate-200);background:#ffffff80;border-radius:.75rem;padding:1.5rem;text-align:center;color:var(--slate-400);font-size:.875rem}
+  .snap-empty .ar{font-size:1.5rem}
+
+  /* compare panel */
+  .cmp-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--slate-200)}
+  .cmp-slot{border:1px solid var(--slate-200);background:#f8fafc66;border-radius:.375rem;padding:.5rem;font-size:.75rem}
+  .cmp-slot.empty{border-style:dashed;background:transparent;color:var(--slate-400)}
+  .cmp-slot .tag{font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-500)}
+  .cmp-slot .nm{margin:.25rem 0 0;font-size:.72rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cmp-rows{display:grid;gap:.5rem;padding:1rem 1.25rem}
+  .cmp-row{border:1px solid var(--slate-200);background:#fff;border-radius:.5rem;padding:.625rem .75rem}
+  .cmp-row .cl{font-size:.625rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--slate-500)}
+  .cmp-row .cl .h{margin-left:.4rem;text-transform:none;letter-spacing:normal;color:var(--slate-400)}
+  .cmp-vals{margin-top:.5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+  .cmp-val{border-radius:.375rem;padding:.35rem .5rem;font-size:.875rem;font-weight:600;background:var(--slate-50);color:var(--slate-700)}
+  .cmp-val.win{background:var(--emerald-50);color:var(--emerald-800);box-shadow:inset 0 0 0 1px var(--emerald-200)}
+
+  /* empty state */
+  .empty{margin-top:2rem;border:2px dashed var(--slate-200);background:#fff;border-radius:.75rem;padding:3rem;text-align:center}
+
+  /* ---- deal detail page ---- */
+  .detail{display:none}
+  .detail.active{display:block}
+  .dash-view.hidden{display:none}
+  .detail-grid{display:grid;grid-template-columns:1fr;gap:1.5rem;margin-top:1.5rem}
+  @media(min-width:1024px){.detail-grid{grid-template-columns:200px 1fr}}
+  .sidebar{align-self:start}
+  .sidebar ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.25rem}
+  .sidebar li a{display:block;border-radius:.375rem;padding:.45rem .7rem;font-size:.82rem;color:var(--slate-600);text-decoration:none;cursor:pointer}
+  .sidebar li a:hover{background:var(--slate-50)}
+  .sidebar li a.cur{background:#0b1220;color:#fff;font-weight:600;box-shadow:var(--shadow-sm)}
+  .back-link{display:inline-flex;align-items:center;gap:.35rem;font-size:.85rem;color:var(--slate-500);text-decoration:none;cursor:pointer;margin-bottom:.25rem}
+  .back-link:hover{text-decoration:underline}
+  .detail h2{font-size:1.4rem;font-weight:680;letter-spacing:-.025em;margin:.25rem 0 0;color:#0b1220}
+  .detail .sub{margin:.4rem 0 0;font-size:.875rem;color:var(--slate-500)}
+  .ai-panel{margin-top:1.5rem;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:1.35rem}
+  .ai-panel .ai-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .ai-panel .ai-top h4{margin:0;font-size:.875rem;font-weight:600}
+  .ai-panel .ai-top p{margin:.2rem 0 0;font-size:.72rem;color:var(--slate-500);max-width:30rem}
+  .ai-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+  .ai-btn{border:1px solid var(--slate-200);background:#fff;border-radius:.375rem;padding:.35rem .65rem;font-size:.72rem;font-weight:500;cursor:pointer}
+  .ai-btn:hover{background:var(--slate-50)}
+  .ai-box{margin-top:1rem;border:1px solid var(--slate-200);background:#fff;border-radius:.375rem;padding:.75rem}
+  .ai-box .bx-l{font-size:.625rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--slate-500);margin:0}
+  .ai-box p.bd{margin:.4rem 0 0;font-size:.875rem;color:var(--slate-700);white-space:pre-wrap}
+  .ai-box ul{margin:.5rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.3rem;font-size:.85rem}
+  .ai-box li{display:flex;gap:.5rem;align-items:baseline}
+  .tag-chip{border-radius:.25rem;background:var(--slate-100);color:var(--slate-600);padding:.05rem .35rem;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+  .ai-box.flags{border-color:var(--amber-200);background:var(--amber-50)}
+  .sev{border-radius:.25rem;padding:.05rem .35rem;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em}
+  .sev.high{background:#fee2e2;color:#991b1b} .sev.med{background:#fef9c3;color:#854d0e} .sev.low{background:var(--slate-100);color:var(--slate-700)}
+  .group{margin-top:1.25rem;border:1px solid var(--line);background:#fff;border-radius:var(--r);padding:1.35rem;box-shadow:var(--shadow-sm)}
+  .group .leg{font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--slate-400);margin:0 0 .85rem}
+  .facts{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem 1rem}
+  @media(min-width:640px){.facts{grid-template-columns:repeat(3,1fr)}}
+  .fact .fl{font-size:.7rem;color:var(--slate-500);margin:0}
+  .fact .fv{margin:.1rem 0 0;font-size:.95rem;font-weight:600}
+  .photos{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+  @media(min-width:640px){.photos{grid-template-columns:repeat(3,1fr)}}
+  .photo{border:1px solid var(--slate-200);border-radius:.5rem;overflow:hidden}
+  .photo .img{aspect-ratio:16/10;display:flex;align-items:flex-end;padding:.5rem;color:#fff;font-size:.72rem;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+  .photo .pn{border-top:1px solid var(--slate-200);padding:.45rem .6rem;font-size:.72rem;color:var(--slate-700)}
+  .photo .pn b{color:var(--slate-500);font-weight:500}
+
+  /* toast */
+  #toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%) translateY(2rem);
+    background:var(--slate-900);color:#fff;padding:.7rem 1.1rem;border-radius:.6rem;font-size:.85rem;
+    box-shadow:0 10px 25px rgba(0,0,0,.25);opacity:0;transition:all .3s;pointer-events:none;max-width:90vw;z-index:50}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast b{color:var(--emerald-500)}
+
+  .foot{margin-top:3rem;text-align:center;font-size:.72rem;color:var(--slate-400)}
+  /* Cross-page navigation back to the professional site */
+  .app-topnav{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;
+    margin-bottom:1rem;padding:.55rem .9rem;border-radius:10px;
+    background:#0f2740;color:#dce8f2;font-size:.92rem}
+  .app-topnav .home{font-weight:700;color:#fff;text-decoration:none;margin-right:auto}
+  .app-topnav a{color:#bcd6ea;text-decoration:none;padding:.2rem .5rem;border-radius:7px}
+  .app-topnav a:hover{background:rgba(111,183,212,.25);color:#fff}
+  .app-topnav a[aria-current]{background:#f08a3c;color:#1c1206;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="app-topnav" aria-label="Site">
+    <a class="home" href="index.html">Ammon Hasson</a>
+    <a href="index.html">Home</a>
+    <a href="resume.html">Résumé</a>
+    <a href="scratch.html">Paragliding</a>
+    <a href="app.html" aria-current="page">RE Underwriter</a>
+  </nav>
+
+  <div class="demo-banner">
+    <span class="ic">🧪</span>
+    <div>
+      <b>Academic demonstration.</b> RE Underwriter is an interactive real-estate acquisition screening
+      application I developed in collaboration with AI. It uses sample Northern Utah properties to demonstrate
+      deal comparison, underwriting metrics, risk identification, renovation analysis, and investment
+      recommendations. The listing-import workflow is <b>simulated</b> for this public, serverless version —
+      it fills in a canned example so you can see the flow, and it is not performing live AI extraction.
+      There is no login and no saved database, so a refresh resets everything.
+      <br><br>
+      <b>How the full app differs:</b> the version I use privately runs on a server and does perform live
+      listing import — fetching a real listing from a pasted URL or screenshot, extracting the details with AI,
+      downloading the photos, and saving deals to a database so I can revisit and update them over time.
+      This public demo keeps all of that interactive on the front end, with the live/private pieces simulated.
+      Everything else works: click a deal for its snapshot charts, tick boxes to compare, and open a deal for the
+      full underwriting view.
+    </div>
+  </div>
+
+  <!-- ============ DASHBOARD VIEW ============ -->
+  <div class="dash-view" id="dashView">
+    <header class="app">
+      <div>
+        <div class="brand">
+          <span class="logo">RE</span>
+          <h1>Underwriter</h1>
+        </div>
+        <p class="subtitle">Northern Utah · live-in / flip / rental-fallback screening. Sorted by most recent.</p>
+      </div>
+      <div class="hdr-actions">
+        <button class="btn-ghost" id="toggleDiscarded">Show discarded (1)</button>
+        <button class="btn-ghost" onclick="toast('Settings are part of the full app — not included in this demo.')">Settings</button>
+        <button class="btn-ghost" onclick="addBlankDeal()">+ Blank deal</button>
+      </div>
+    </header>
+
+    <!-- quick start -->
+    <form class="card qs" onsubmit="return createFromListing(event)">
+      <div class="qs-head">
+        <span class="qs-ic">⚡</span>
+        <div>
+          <h3>Quick-start a deal from a listing <span style="font-weight:600;color:var(--accent,#f08a3c)">· simulated in this demo</span></h3>
+          <p>In the full app, you paste a listing URL or text (or drop screenshots) and AI fills in the intake
+            fields and downloads the photos automatically — for UtahRealEstate, MLS, KSL, and FSBO listings.
+            <b>In this public demo this is simulated:</b> submitting loads a canned sample listing so you can see the
+            end-to-end workflow without a server or live AI.</p>
+        </div>
+      </div>
+      <textarea class="qs-input" id="qsText" rows="4"
+        placeholder="Paste a listing URL — or Ctrl+A / Ctrl+C the listing page text here…"></textarea>
+      <div class="qs-row">
+        <span class="qs-hint">📷 Screenshots: <em style="color:var(--slate-400)">(disabled in demo)</em></span>
+        <button class="btn-primary" id="qsBtn" type="submit"><span aria-hidden="true">✨</span> Create deal from listing</button>
+      </div>
+    </form>
+
+    <!-- dashboard grid -->
+    <div class="dash" id="dashGrid"></div>
+
+    <div class="foot">RE Underwriter · standalone demo build · all figures are illustrative sample data</div>
+  </div>
+
+  <!-- ============ DETAIL VIEW ============ -->
+  <div class="detail" id="detailView"></div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ----------------------------------------------------------------
+   Formatting helpers (mirrors lib/format.ts)
+---------------------------------------------------------------- */
+function money(n){
+  if(n===null||n===undefined||isNaN(n)) return "—";
+  return n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0,minimumFractionDigits:0});
+}
+function pct(n){
+  if(n===null||n===undefined||!isFinite(n)) return "—";
+  return n.toFixed(1)+"%";
+}
+
+/* ----------------------------------------------------------------
+   Sample deals
+---------------------------------------------------------------- */
+const DEALS = [
+  {
+    id:"d1", address:"412 N Quince St", city:"Kaysville", state:"UT", zip:"84037",
+    listingPrice:389000, sqft:1860, beds:3, baths:2, yearBuilt:1978,
+    arvBase:512000, netProfitFlip:61800, roiFlip:0.31, cashRequired:118400,
+    monthlyTotal:2340, rentalCashFlow:285, dealScore:88, recommendation:"pursue",
+    maxOfferPrice:402000, status:"underwritten",
+    gutReaction:"Yes — dated kitchen but the bones and the street are right.",
+    listingDescription:"Charming Kaysville rambler on a quiet cul-de-sac. Original kitchen and baths, hardwood under the carpet, newer roof (2021). Big fenced yard, RV pad. Estate sale, sold as-is. Bring your vision!",
+    aiSummary:"Solid value-add rambler in a strong Kaysville pocket. The home is dated (original kitchen/baths) but structurally sound with a recent roof — classic cosmetic-flip profile. Estate / as-is sale suggests negotiating room. Hardwood under carpet is upside. Main risk is unknown mechanical age.",
+    clues:[
+      {category:"kitchen",label:"Full kitchen remodel",reasoning:"\"original kitchen\" — cabinets, counters, appliances"},
+      {category:"bath",label:"Update 2 baths",reasoning:"\"original baths\""},
+      {category:"flooring",label:"Refinish hardwood",reasoning:"\"hardwood under the carpet\" — pull carpet, refinish"},
+      {category:"paint",label:"Full interior paint",reasoning:"standard on a dated as-is home"}
+    ],
+    flags:[
+      {flag:"Unknown furnace/AC age",severity:"med",evidence:"only the roof age is mentioned"},
+      {flag:"As-is estate sale",severity:"low",evidence:"budget extra contingency for surprises"}
+    ],
+    photos:[
+      {label:"Exterior",note:"Brick rambler, good curb",g:"linear-gradient(135deg,#15803d,#22c55e)"},
+      {label:"Kitchen",note:"Original oak cabinets — full remodel",g:"linear-gradient(135deg,#b45309,#f59e0b)"},
+      {label:"Living room",note:"Carpet over hardwood",g:"linear-gradient(135deg,#475569,#94a3b8)"},
+      {label:"Primary bath",note:"Dated, pink tile",g:"linear-gradient(135deg,#9d174d,#ec4899)"},
+      {label:"Backyard",note:"Large fenced lot + RV pad",g:"linear-gradient(135deg,#166534,#4ade80)"},
+      {label:"Basement",note:"Unfinished, dry",g:"linear-gradient(135deg,#334155,#64748b)"}
+    ]
+  },
+  {
+    id:"d2", address:"73 Canyon View Dr", city:"Farmington", state:"UT", zip:"84025",
+    listingPrice:415000, sqft:2040, beds:4, baths:2.5, yearBuilt:1995,
+    arvBase:498000, netProfitFlip:47200, roiFlip:0.24, cashRequired:104600,
+    monthlyTotal:2510, rentalCashFlow:430, dealScore:81, recommendation:"pursue",
+    maxOfferPrice:424000, status:"underwritten",
+    gutReaction:"Strong rental fallback — cash flows even if the flip is soft.",
+    listingDescription:"Well-kept two-story near Farmington Canyon trails. Updated mechanicals, newer windows. Kitchen and baths are builder-grade but functional. Mountain views. Great long-term rental or light cosmetic flip.",
+    aiSummary:"Lower-risk deal: mechanicals and windows already updated, so rehab is light and cosmetic. Numbers are tighter on the flip but the rental fallback is the strongest of the set — it cash-flows positively, which de-risks a slow resale. Good 'sleep at night' deal.",
+    clues:[
+      {category:"kitchen",label:"Cosmetic kitchen refresh",reasoning:"\"builder-grade but functional\" — paint cabinets, new counters"},
+      {category:"flooring",label:"Carpet + LVP main level",reasoning:"standard refresh"},
+      {category:"paint",label:"Interior paint",reasoning:"freshen throughout"}
+    ],
+    flags:[
+      {flag:"Tighter flip margin",severity:"med",evidence:"ARV spread thinner than comps support aggressively"}
+    ],
+    photos:[
+      {label:"Exterior",note:"Two-story, mountain backdrop",g:"linear-gradient(135deg,#1d4ed8,#60a5fa)"},
+      {label:"Kitchen",note:"Builder-grade, functional",g:"linear-gradient(135deg,#a16207,#fbbf24)"},
+      {label:"Great room",note:"Vaulted, lots of light",g:"linear-gradient(135deg,#0f766e,#2dd4bf)"},
+      {label:"Primary suite",note:"Good size, walk-in",g:"linear-gradient(135deg,#6d28d9,#a78bfa)"},
+      {label:"View",note:"Farmington Canyon",g:"linear-gradient(135deg,#0369a1,#38bdf8)"}
+    ]
+  },
+  {
+    id:"d3", address:"1837 Mountain Rd", city:"Layton", state:"UT", zip:"84041",
+    listingPrice:445000, sqft:2210, beds:4, baths:3, yearBuilt:1968,
+    arvBase:534000, netProfitFlip:38500, roiFlip:0.17, cashRequired:132000,
+    monthlyTotal:2680, rentalCashFlow:-60, dealScore:72, recommendation:"maybe",
+    maxOfferPrice:441000, status:"underwritten",
+    gutReaction:"Maybe — big rehab, but the after-value comps are there.",
+    listingDescription:"Spacious mid-century split-level. Needs everything: kitchen, baths, flooring, paint, and the deck is rotting. Foundation looks solid. Priced to move. Tons of square footage for the money in a hot Layton school zone.",
+    aiSummary:"Heavier-rehab project with real upside thanks to square footage and a desirable school zone. This is a 'maybe' because the scope is broad (full gut-ish) and the rental fallback is slightly negative — so the flip has to work. Deck rot and 1968 mechanicals are the budget wildcards.",
+    clues:[
+      {category:"kitchen",label:"Full kitchen gut",reasoning:"\"needs everything\""},
+      {category:"bath",label:"Gut 3 baths",reasoning:"\"needs… baths\""},
+      {category:"exterior",label:"Rebuild deck",reasoning:"\"deck is rotting\""},
+      {category:"flooring",label:"Full flooring replace",reasoning:"\"flooring\" called out"},
+      {category:"mechanical",label:"Budget furnace/AC/water heater",reasoning:"1968 build, likely original-ish"}
+    ],
+    flags:[
+      {flag:"Broad rehab scope",severity:"high",evidence:"\"needs everything\" — easy to underestimate"},
+      {flag:"Negative rental fallback",severity:"med",evidence:"won't cash-flow as a rental at this price"},
+      {flag:"Deck rot",severity:"med",evidence:"check for adjacent water intrusion"}
+    ],
+    photos:[
+      {label:"Exterior",note:"Split-level, tired siding",g:"linear-gradient(135deg,#7c2d12,#ea580c)"},
+      {label:"Kitchen",note:"Full gut needed",g:"linear-gradient(135deg,#92400e,#f59e0b)"},
+      {label:"Deck",note:"Rotting — rebuild",g:"linear-gradient(135deg,#713f12,#ca8a04)"},
+      {label:"Lower level",note:"Big footprint",g:"linear-gradient(135deg,#374151,#9ca3af)"},
+      {label:"Hall bath",note:"Original",g:"linear-gradient(135deg,#155e75,#22d3ee)"}
+    ]
+  },
+  {
+    id:"d4", address:"250 E Center St", city:"Kaysville", state:"UT", zip:"84037",
+    listingPrice:520000, sqft:2380, beds:4, baths:2.5, yearBuilt:2004,
+    arvBase:558000, netProfitFlip:12400, roiFlip:0.06, cashRequired:138000,
+    monthlyTotal:3010, rentalCashFlow:-340, dealScore:58, recommendation:"marginal",
+    maxOfferPrice:489000, status:"underwritten",
+    gutReaction:"Meh — it's nice, but there's no meat on the bone at this price.",
+    listingDescription:"Move-in ready 2004 two-story in the heart of Kaysville. Updated kitchen 2019, new carpet, fresh paint. Nothing to do but move in. Priced at top of market for the area.",
+    aiSummary:"Turnkey and pretty, but that's the problem for an investor — it's already renovated and priced at retail, leaving almost no spread. Minimal rehab means minimal forced appreciation. Only works as a deal if you negotiate well under ask. Better as an owner-occupant buy than a flip.",
+    clues:[
+      {category:"paint",label:"Touch-up only",reasoning:"\"fresh paint\" already done"}
+    ],
+    flags:[
+      {flag:"No margin at ask",severity:"high",evidence:"ARV barely above asking; retail-priced"},
+      {flag:"Negative rental fallback",severity:"med",evidence:"won't cash-flow as a rental"}
+    ],
+    photos:[
+      {label:"Exterior",note:"Clean 2004 two-story",g:"linear-gradient(135deg,#1e40af,#3b82f6)"},
+      {label:"Kitchen",note:"Updated 2019 — already done",g:"linear-gradient(135deg,#a16207,#facc15)"},
+      {label:"Family room",note:"Move-in ready",g:"linear-gradient(135deg,#3f3f46,#a1a1aa)"}
+    ]
+  },
+  {
+    id:"d5", address:"89 W 200 S", city:"Clearfield", state:"UT", zip:"84015",
+    listingPrice:362000, sqft:1480, beds:3, baths:1, yearBuilt:1959,
+    arvBase:392000, netProfitFlip:-8600, roiFlip:-0.07, cashRequired:96000,
+    monthlyTotal:2190, rentalCashFlow:-180, dealScore:38, recommendation:"reject",
+    maxOfferPrice:318000, status:"rejected",
+    gutReaction:"Pass — busy road, one bath, and the comps just aren't there.",
+    listingDescription:"Investor special near the freeway. Single bath, small bedrooms, knob-and-tube wiring noted on inspection. Foundation has a known crack. Cash only. As-is.",
+    aiSummary:"This one screens out. Knob-and-tube wiring and a known foundation crack are major-dollar items, the single bath caps resale appeal, and the freeway-adjacent location hurts the ARV. Even at a low offer the math goes negative. Recommend rejecting unless acquired far below ask.",
+    clues:[
+      {category:"electrical",label:"Full rewire",reasoning:"\"knob-and-tube wiring\""},
+      {category:"foundation",label:"Foundation repair",reasoning:"\"known crack\" — get an engineer's bid"},
+      {category:"bath",label:"Add a second bath",reasoning:"single bath caps resale value"}
+    ],
+    flags:[
+      {flag:"Foundation crack",severity:"high",evidence:"could be five figures+"},
+      {flag:"Knob-and-tube wiring",severity:"high",evidence:"insurers often refuse; full rewire"},
+      {flag:"Busy-road location",severity:"med",evidence:"drags ARV vs interior-lot comps"}
+    ],
+    photos:[
+      {label:"Exterior",note:"On a busy road",g:"linear-gradient(135deg,#9f1239,#fb7185)"},
+      {label:"Kitchen",note:"Small, dated",g:"linear-gradient(135deg,#854d0e,#eab308)"},
+      {label:"Basement",note:"Foundation crack visible",g:"linear-gradient(135deg,#1f2937,#6b7280)"}
+    ]
+  }
+];
+
+/* The canned listing the "Create deal from listing" button injects. */
+const IMPORTED_DEAL = {
+  id:"imp1", address:"556 S Oakridge Ln", city:"Bountiful", state:"UT", zip:"84010",
+  listingPrice:398000, sqft:1720, beds:3, baths:2, yearBuilt:1982,
+  arvBase:489000, netProfitFlip:52300, roiFlip:0.28, cashRequired:112000,
+  monthlyTotal:2400, rentalCashFlow:210, dealScore:84, recommendation:"pursue",
+  maxOfferPrice:408000, status:"underwritten",
+  gutReaction:"(auto-imported) Looks promising — verify the rehab scope on a walk-through.",
+  listingDescription:"Bountiful bench rambler with mountain and valley views. Original kitchen, updated furnace (2020). Mature landscaping. Some water staining in basement noted. Motivated seller.",
+  aiSummary:"AI-extracted from the pasted listing (demo). Bench-location rambler with view premium and an already-updated furnace, so rehab leans cosmetic. Basement water staining is the one thing to verify on a walk-through. Motivated seller plus a healthy ARV spread make this a pursue.",
+  clues:[
+    {category:"kitchen",label:"Full kitchen remodel",reasoning:"\"original kitchen\""},
+    {category:"flooring",label:"Flooring throughout",reasoning:"dated finishes"},
+    {category:"basement",label:"Investigate water staining",reasoning:"\"water staining in basement\""}
+  ],
+  flags:[
+    {flag:"Basement water staining",severity:"med",evidence:"source unknown — check grading/gutters"}
+  ],
+  photos:[
+    {label:"Exterior",note:"Bench rambler with views",g:"linear-gradient(135deg,#15803d,#34d399)"},
+    {label:"Kitchen",note:"Original — full remodel",g:"linear-gradient(135deg,#b45309,#fbbf24)"},
+    {label:"View",note:"Valley + mountains",g:"linear-gradient(135deg,#0369a1,#38bdf8)"},
+    {label:"Basement",note:"Water staining to verify",g:"linear-gradient(135deg,#334155,#64748b)"}
+  ]
+};
+
+/* ----------------------------------------------------------------
+   State
+---------------------------------------------------------------- */
+const MAX_COMPARE = 3;
+let deals = DEALS.slice();
+let showDiscarded = false;
+let selectedId = deals.find(d=>d.status!=="rejected")?.id || deals[0]?.id || null;
+let compareIds = [];
+
+const STEPS = ["Intake","Financing","Rehab","Comps","Exit","Summary","Memo"];
+
+/* ----------------------------------------------------------------
+   Helpers for visuals
+---------------------------------------------------------------- */
+function scoreClass(s){
+  if(s===null||s===undefined) return "s-none";
+  if(s>=85) return "s-emerald";
+  if(s>=70) return "s-amber";
+  if(s>=50) return "s-orange";
+  return "s-rose";
+}
+function gaugeStroke(s){
+  if(s===null||s===undefined) return "#cbd5e1";
+  if(s>=85) return "#10b981";
+  if(s>=70) return "#fbbf24";
+  if(s>=50) return "#fb923c";
+  return "#f43f5e";
+}
+function recPill(rec,lg){
+  if(!rec) return "";
+  const labels={pursue:"Pursue",maybe:"Maybe",marginal:"Marginal",reject:"Reject"};
+  return `<span class="pill ${lg?'lg':''} p-${rec}">${labels[rec]||rec}</span>`;
+}
+function statusPill(status){
+  if(status==="rejected") return `<span class="status-pill disc">discarded</span>`;
+  return `<span class="status-pill">${status}</span>`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+/* ----------------------------------------------------------------
+   Dashboard render
+---------------------------------------------------------------- */
+function visibleDeals(){
+  return showDiscarded ? deals : deals.filter(d=>d.status!=="rejected");
+}
+
+function renderDashboard(){
+  const list = visibleDeals();
+  const grid = document.getElementById("dashGrid");
+  const discardedCount = deals.filter(d=>d.status==="rejected").length;
+
+  // discarded toggle button
+  const tg = document.getElementById("toggleDiscarded");
+  if(discardedCount===0){ tg.style.display="none"; }
+  else { tg.style.display=""; tg.textContent = showDiscarded ? "Hide discarded" : `Show discarded (${discardedCount})`; }
+
+  if(list.length===0){
+    grid.style.display="block";
+    grid.innerHTML = `<div class="empty"><p style="font-weight:500">No deals yet</p>
+      <p style="font-size:.875rem;color:var(--slate-500);margin-top:.25rem">Use the quick-start above to drop in a listing.</p></div>`;
+    return;
+  }
+  grid.style.display="grid";
+
+  const rows = list.map(d=>{
+    const isSel = d.id===selectedId;
+    const isChk = compareIds.includes(d.id);
+    const compareMode = compareIds.length>=2;
+    const disabled = !isChk && compareIds.length>=MAX_COMPARE;
+    const profitCls = d.netProfitFlip>0?"pos":(d.netProfitFlip<0?"neg":"");
+    let trCls="";
+    if(isChk) trCls="checked"; else if(isSel && !compareMode) trCls="sel";
+    if(d.status==="rejected") trCls+=" rejected";
+    return `<tr class="${trCls}" onclick="selectDeal('${d.id}')">
+      <td class="c"><input type="checkbox" ${isChk?"checked":""} ${disabled?"disabled":""}
+          onclick="event.stopPropagation();toggleCompare('${d.id}')"></td>
+      <td><span class="${isSel&&!compareMode?'':'hidden'}">${isSel&&!compareMode?'<span class=dot></span>':''}</span><a class="addr-link" onclick="event.stopPropagation();openDeal('${d.id}')">${esc(d.address)}</a></td>
+      <td class="r tnum">${money(d.listingPrice)}</td>
+      <td class="r tnum ${profitCls}">${money(d.netProfitFlip)}</td>
+      <td class="r tnum">${d.roiFlip!==null?pct(d.roiFlip*100):"—"}</td>
+      <td class="c"><span class="score-badge ${scoreClass(d.dealScore)}">${Math.round(d.dealScore)}</span></td>
+      <td>${recPill(d.recommendation)}</td>
+      <td>${statusPill(d.status)}</td>
+    </tr>`;
+  }).join("");
+
+  const selBar = compareIds.length>0 ? `<div class="cmp-bar">
+      <span>${compareIds.length} selected for compare${compareIds.length<2?" — pick at least one more":""}</span>
+      <button onclick="clearCompare()">Clear</button></div>` : "";
+
+  const table = `<div class="card tbl-wrap">
+    ${selBar}
+    <table class="deals">
+      <thead><tr>
+        <th class="c" style="width:2.5rem"></th>
+        <th>Address</th><th class="r">Asking</th><th class="r">Profit</th><th class="r">ROI</th>
+        <th class="c">Score</th><th>Rec</th><th>Status</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+
+  const compareDeals = compareIds.map(id=>deals.find(d=>d.id===id)).filter(Boolean);
+  const panel = compareDeals.length>=2 ? comparePanel(compareDeals) : snapshotPanel(deals.find(d=>d.id===selectedId)||null);
+
+  grid.innerHTML = table + panel;
+}
+
+/* snapshot of a single deal */
+function snapshotPanel(d){
+  if(!d){
+    return `<aside class="snap-empty"><div class="ar">←</div>
+      <p style="margin-top:.5rem">Click a deal in the table to see its snapshot.</p>
+      <p style="margin-top:.25rem;font-size:.75rem">Tip: check the boxes on 2–3 rows to compare them side-by-side.</p></aside>`;
+  }
+  const r=42, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(100,d.dealScore))/100);
+  const arvSpread = d.arvBase!==null && d.listingPrice>0 ? ((d.arvBase-d.listingPrice)/d.listingPrice)*100 : null;
+  const profitTone = d.netProfitFlip>0?"positive":(d.netProfitFlip<0?"negative":"");
+  const rentalTone = d.rentalCashFlow>0?"positive":(d.rentalCashFlow<0?"negative":"");
+  const roiTone = d.roiFlip>0.15?"positive":(d.roiFlip<0?"negative":"");
+  return `<aside class="card snap">
+    <div class="snap-head">
+      <p class="eyebrow">Snapshot</p>
+      <p class="snap-addr">${esc(d.address)}</p>
+      <p class="snap-loc">${[d.city,d.state,d.zip].filter(Boolean).join(", ")}</p>
+    </div>
+    <div class="snap-gauge-row">
+      <div class="gauge">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="10"/>
+          <circle cx="50" cy="50" r="${r}" fill="none" stroke="${gaugeStroke(d.dealScore)}" stroke-width="10"
+            stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" stroke-linecap="round"/>
+        </svg>
+        <div class="center"><span class="gv">${Math.round(d.dealScore)}</span><span class="gl">Score</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.5rem">
+        ${recPill(d.recommendation,true)}${statusPill(d.status)}
+      </div>
+    </div>
+    <div class="snap-tiles">
+      ${tile("Asking",money(d.listingPrice))}
+      ${tile("ARV (base)",money(d.arvBase),"info",arvSpread!==null?`${arvSpread>=0?"+":""}${arvSpread.toFixed(1)}% spread`:"")}
+      ${tile("Flip profit",money(d.netProfitFlip),profitTone)}
+      ${tile("Flip ROI",d.roiFlip!==null?pct(d.roiFlip*100):"—",roiTone)}
+      ${tile("Cash required",money(d.cashRequired))}
+      ${tile("Monthly P+I+T+I",money(d.monthlyTotal))}
+      ${tile("Rental cash flow",money(d.rentalCashFlow),rentalTone,"per month")}
+      ${tile("Max offer",money(d.maxOfferPrice),"info")}
+    </div>
+    <div class="snap-foot"><button class="btn-dark" onclick="openDeal('${d.id}')">Open deal →</button></div>
+  </aside>`;
+}
+function tile(label,value,tone,hint){
+  return `<div class="tile"><p class="tl">${label}</p><p class="tv ${tone||""}">${value}</p>${hint?`<p class="th">${hint}</p>`:""}</div>`;
+}
+
+/* compare panel */
+function bestIndex(values,dir){
+  const idx=values.map((v,i)=>({v,i})).filter(p=>p.v!==null&&isFinite(p.v));
+  if(idx.length<2) return -1;
+  return idx.reduce((a,c)=>{ if(dir==="higher") return c.v>a.v?c:a; return c.v<a.v?c:a; }).i;
+}
+function comparePanel(ds){
+  const tags=["A","B","C"];
+  const slots=ds.slice(); while(slots.length<MAX_COMPARE) slots.push(null);
+  const slotHtml = slots.map((d,i)=>`<div class="cmp-slot ${d?"":"empty"}">
+      <div class="tag">${tags[i]}</div><div class="nm">${d?esc(d.address):"Empty slot"}</div></div>`).join("");
+
+  function row(label,key,dir,fmt,hint){
+    const vals=slots.map(d=>d?d[key]:null);
+    const win=dir?bestIndex(vals,dir):-1;
+    const cells=vals.map((v,i)=>`<div class="cmp-val ${i===win?"win":""}">${fmt(v)}</div>`).join("");
+    return `<div class="cmp-row"><div class="cl">${label}${hint?`<span class="h">(${hint})</span>`:""}</div><div class="cmp-vals">${cells}</div></div>`;
+  }
+  const fm=v=>money(v), fp=v=>v===null||!isFinite(v)?"—":pct(v*100), fs=v=>v===null?"—":Math.round(v).toString();
+  return `<aside class="card snap">
+    <div class="snap-head" style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><p class="eyebrow">Comparing ${ds.length} deals</p>
+        <p class="snap-loc" style="margin-top:.25rem">Best value per metric highlighted in green.</p></div>
+      <button class="btn-ghost" style="padding:.2rem .5rem;font-size:.72rem" onclick="clearCompare()">Clear</button>
+    </div>
+    <div class="cmp-slots">${slotHtml}</div>
+    <div class="cmp-rows">
+      ${row("Score","dealScore","higher",fs)}
+      ${row("Asking","listingPrice","lower",fm,"lower better")}
+      ${row("ARV (base)","arvBase","higher",fm)}
+      ${row("Flip profit","netProfitFlip","higher",fm)}
+      ${row("Flip ROI","roiFlip","higher",fp)}
+      ${row("Cash required","cashRequired","lower",fm,"lower better")}
+      ${row("Monthly P+I+T+I","monthlyTotal","lower",fm,"lower better")}
+      ${row("Rental CF / mo","rentalCashFlow","higher",fm)}
+      ${row("Max offer","maxOfferPrice","higher",fm)}
+    </div>
+  </aside>`;
+}
+
+/* ----------------------------------------------------------------
+   Interactions
+---------------------------------------------------------------- */
+function selectDeal(id){ selectedId=id; renderDashboard(); }
+function toggleCompare(id){
+  if(compareIds.includes(id)) compareIds=compareIds.filter(x=>x!==id);
+  else if(compareIds.length<MAX_COMPARE) compareIds.push(id);
+  renderDashboard();
+}
+function clearCompare(){ compareIds=[]; renderDashboard(); }
+function toggleDiscardedFn(){ showDiscarded=!showDiscarded; renderDashboard(); }
+
+function addBlankDeal(){
+  toast("In the full app this starts a blank deal you fill in by hand. Try the ✨ quick-start to see the AI flow instead.");
+}
+
+/* simulate AI extraction from a pasted listing */
+let importedAdded = false;
+function createFromListing(e){
+  e.preventDefault();
+  const btn=document.getElementById("qsBtn");
+  btn.disabled=true;
+  btn.innerHTML=`<svg class="spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" style="opacity:.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg> Extracting…`;
+  setTimeout(()=>{
+    btn.disabled=false;
+    btn.innerHTML=`<span aria-hidden="true">✨</span> Create deal from listing`;
+    document.getElementById("qsText").value="";
+    if(!importedAdded){
+      deals.unshift(IMPORTED_DEAL);
+      importedAdded=true;
+      selectedId=IMPORTED_DEAL.id;
+    } else {
+      selectedId=IMPORTED_DEAL.id;
+    }
+    renderDashboard();
+    toast("✨ Demo: AI 'extracted' a sample listing — 556 S Oakridge Ln. In the real app it reads your pasted URL/text and pulls in the photos.");
+    document.getElementById("dashView").scrollIntoView({behavior:"smooth"});
+  }, 1600);
+  return false;
+}
+
+/* ----------------------------------------------------------------
+   Deal detail view
+---------------------------------------------------------------- */
+function openDeal(id){
+  const d=deals.find(x=>x.id===id); if(!d) return;
+  const dv=document.getElementById("detailView");
+  const dash=document.getElementById("dashView");
+
+  const sidebar = `<nav class="sidebar"><ol>
+    ${STEPS.map((s,i)=>`<li><a class="${i===0?"cur":""}" onclick="${i===0?"":`toast('The ${s} step is part of the full app — this demo shows the Intake view.')`}">${i+1}. ${s}</a></li>`).join("")}
+  </ol></nav>`;
+
+  const facts = [
+    ["Listing price",money(d.listingPrice)],["City",`${d.city}, ${d.state} ${d.zip}`],["Year built",d.yearBuilt],
+    ["Sqft",d.sqft.toLocaleString()],["Beds",d.beds],["Baths",d.baths],
+  ].map(([l,v])=>`<div class="fact"><p class="fl">${l}</p><p class="fv">${v}</p></div>`).join("");
+
+  const cluesHtml = d.clues.map(c=>`<li><span class="tag-chip">${c.category}</span><span><b>${esc(c.label)}</b>${c.reasoning?` <span style="color:var(--slate-500);font-size:.78rem">— ${esc(c.reasoning)}</span>`:""}</span></li>`).join("");
+  const flagsHtml = d.flags.map(f=>`<li><span class="sev ${f.severity}">${f.severity}</span> <b>${esc(f.flag)}</b>${f.evidence?` <span style="color:var(--slate-500);font-size:.78rem">— ${esc(f.evidence)}</span>`:""}</li>`).join("");
+
+  const photos = d.photos.map(p=>`<div class="photo">
+      <div class="img" style="background:${p.g}">${esc(p.label)}</div>
+      <div class="pn"><b>AI:</b> ${esc(p.note)}</div></div>`).join("");
+
+  dv.innerHTML = `
+    <a class="back-link" onclick="closeDeal()">← Dashboard</a>
+    <div class="detail-grid">
+      ${sidebar}
+      <div>
+        <h2>${esc(d.address)}</h2>
+        <p class="sub">${[d.city,d.state,d.zip].filter(Boolean).join(", ")} · ${recPill(d.recommendation)} ${statusPill(d.status)} · Score ${Math.round(d.dealScore)}</p>
+
+        <div class="ai-panel">
+          <div class="ai-top">
+            <div><h4>AI assists</h4><p>Output is not authoritative — verify before acting. (In this demo these are pre-run on the sample listing.)</p></div>
+            <div class="ai-btns">
+              <button class="ai-btn" onclick="toast('Already summarized below (demo).')">Summarize</button>
+              <button class="ai-btn" onclick="toast('Rehab clues shown below (demo).')">Find rehab clues</button>
+              <button class="ai-btn" onclick="toast('Red flags shown below (demo).')">Flag red flags</button>
+              <button class="ai-btn" onclick="toast('Photo review shown under each photo (demo).')">Review photos</button>
+            </div>
+          </div>
+          <div class="ai-box"><p class="bx-l">Summary</p><p class="bd">${esc(d.aiSummary)}</p></div>
+          <div class="ai-box"><p class="bx-l">Rehab clues from description</p><ul>${cluesHtml}</ul></div>
+          <div class="ai-box flags"><p class="bx-l" style="color:var(--amber-800)">Red flags</p><ul>${flagsHtml}</ul></div>
+        </div>
+
+        <div class="group"><p class="leg">Gut reaction</p>
+          <p style="margin:0;font-size:.9rem;color:var(--slate-700);font-style:italic">“${esc(d.gutReaction)}”</p></div>
+
+        <div class="group"><p class="leg">Property</p><div class="facts">${facts}</div></div>
+
+        <div class="group"><p class="leg">Listing description</p>
+          <p style="margin:0;font-size:.85rem;color:var(--slate-700);white-space:pre-wrap">${esc(d.listingDescription)}</p></div>
+
+        <div class="group"><p class="leg">Photos · auto-imported from listing</p><div class="photos">${photos}</div></div>
+
+        <div style="margin-top:1.5rem"><a class="back-link" onclick="closeDeal()">← Back to dashboard</a></div>
+      </div>
+    </div>`;
+
+  dash.classList.add("hidden");
+  dv.classList.add("active");
+  window.scrollTo({top:0});
+}
+function closeDeal(){
+  document.getElementById("detailView").classList.remove("active");
+  document.getElementById("dashView").classList.remove("hidden");
+  renderDashboard();
+  window.scrollTo({top:0});
+}
+
+/* ----------------------------------------------------------------
+   Toast
+---------------------------------------------------------------- */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.innerHTML=msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),4200);
+}
+
+/* ----------------------------------------------------------------
+   Init
+---------------------------------------------------------------- */
+document.getElementById("toggleDiscarded").addEventListener("click",toggleDiscardedFn);
+renderDashboard();
+</script>
+</body>
+</html>
