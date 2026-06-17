@@ -7,9 +7,12 @@ Things to personally review, confirm, or tweak before you submit. Exact files/se
    GitHub Pages URL). Scroll to **"Paragliding by the Numbers — Reading the Weather."** Confirm the
    Tableau graph renders and you can hover/click it.
    - **If it shows an error or doesn't load:** open `scratch.html`, find the line
-     `<param name="name" value="Weather_Good/WeatherStory" />` and replace the value with a known-good
-     public viz, e.g. `Hurricane_Revised/Dashboard3` (hurricane wind speeds) — both are weather/wind
-     themed and fit the page. Re-test. Do not submit with a broken embed.
+     `<param name="name" value="Weather_Good/WeatherStory" />` and replace the value with the
+     assignment's preferred paragliding viz: `UKParaglidingXCLeague/Flightbrowser`
+     (cross-country paragliding flights — the most on-theme option). Re-test on the live site.
+     Do not submit with a broken embed.
+   - *(Verified during build: the current weather viz has a live, rendered Tableau Public preview,
+     so it should load. This is just a safety net.)*
 2. **YouTube plays.** Same page, "Why the Red Bull X-Alps Fascinates Me" — confirm the video plays on the live site.
 3. **Video plays.** "Watch my first flight" — confirm `first-flight.mp4` plays. (It was converted from your
    HEVC `.MOV` to browser-friendly H.264.)
